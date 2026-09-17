@@ -1,0 +1,42 @@
+---
+import "@/styles/global.css";
+import { Font } from "astro:assets";
+import SkipLink from "@/components/Global/SkipLink.astro";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8f9f7" />
+    <meta
+      name="description"
+      content="theWall. Un espacio para tus tareas y para hacer una cosa a la vez."
+    />
+    <title>theWall</title>
+    <link rel="icon" type="image/svg+xml" href="/thewall.svg" />
+    <Font cssVariable="--font-inter" preload />
+  </head>
+  <body class="wall-page">
+    <SkipLink label="Saltar al tablero" />
+    <main id="main" tabindex="-1"><slot /></main>
+  </body>
+</html>
+
+<style is:global>
+  @layer components {
+    .wall-page > .skip-link {
+      opacity: 0;
+      pointer-events: none;
+      background: #171918;
+      color: white;
+      border-radius: 0.125rem;
+      &:focus-visible {
+        opacity: 1;
+        pointer-events: auto;
+        translate: 0 0;
+      }
+    }
+  }
+</style>

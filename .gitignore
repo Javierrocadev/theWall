@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # local agent settings
 .claude/settings.local.json
+
+# local test output
+test-results/
+playwright-report/

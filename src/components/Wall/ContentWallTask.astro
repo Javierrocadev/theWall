@@ -1,0 +1,183 @@
+---
+import { Check, Pencil, GripVertical, RotateCcw, Trash } from "@lucide/astro";
+import Button from "@/components/Button.astro";
+
+interface Props {
+  /** Set to `false` to skip rendering this component and its children. */
+  render?: boolean;
+}
+const { render = true } = Astro.props;
+---
+
+{
+  render && (
+    <article class="wall-task_wrap" data-task-id="" role="listitem">
+      <div class="wall-task_body">
+        <Button
+          class="wall-task_check wall_icon"
+          data-action="toggle"
+          aria-label="Completar tarea"
+          title="Completar tarea"
+        >
+          <>
+            <Check data-pending-icon />
+            <RotateCcw data-completed-icon />
+          </>
+        </Button>
+        <button
+          type="button"
+          class="wall-task_select"
+          data-action="select"
+          aria-label="Mover tarea"
+        >
+          <span class="wall-task_text" data-task-text />
+        </button>
+        <div class="wall-task_tools">
+          <Button
+            class="wall_icon"
+            data-action="edit"
+            aria-label="Editar tarea"
+            title="Editar tarea"
+          >
+            <Pencil />
+          </Button>
+          <Button
+            class="wall_icon"
+            data-action="delete-task"
+            aria-label="Eliminar tarea"
+            title="Eliminar tarea"
+          >
+            <Trash />
+          </Button>
+          <GripVertical class="wall-task_grip" aria-hidden="true" />
+        </div>
+      </div>
+    </article>
+  )
+}
+
+<style is:global>
+  @layer components {
+    .wall-task_wrap {
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      color: var(--wall-ink);
+      list-style: none;
+      &.is-selected {
+        z-index: 3;
+      }
+      &.is-selected .wall-task_body {
+        border-color: var(--wall-red);
+        box-shadow: 0.25rem 0.25rem 0 var(--wall-red);
+      }
+      &.is-held .wall-task_body {
+        animation: wall-shake 180ms ease-in-out 6;
+      }
+      &.is-completed .wall-task_text {
+        text-decoration: line-through;
+        color: var(--wall-muted);
+      }
+      &.is-completed .wall-task_check {
+        background: var(--wall-mint);
+      }
+      &.sortable-ghost {
+        opacity: 0.2;
+      }
+      &.sortable-fallback {
+        z-index: 100 !important;
+        pointer-events: none;
+      }
+      &.sortable-fallback .wall-task_body {
+        box-shadow: 0.45rem 0.45rem 0 rgb(23 25 24 / 0.18);
+        transform: rotate(-2deg);
+      }
+      &.is-flying {
+        z-index: 80;
+        pointer-events: none;
+        transform-origin: center;
+        will-change: transform, opacity;
+      }
+      &.is-flying .wall-task_body {
+        box-shadow: 0.45rem 0.45rem 0 rgb(23 25 24 / 0.16);
+      }
+      &.is-draft .wall-task_check,
+      &.is-draft .wall-task_tools > button {
+        display: none;
+      }
+    }
+    .wall-task_body {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1.125rem 1rem;
+      background: white;
+      border: 0.0625rem solid var(--wall-line);
+      border-radius: 0.125rem;
+      transition:
+        border-color 150ms,
+        box-shadow 150ms,
+        background 150ms;
+      min-height: 6.75rem;
+    }
+    .wall-task_select {
+      flex: 1;
+      min-width: 0;
+      min-height: 3.5rem;
+      text-align: left;
+      background: transparent;
+      padding: 0.3rem 0;
+      border: 0;
+      cursor: grab;
+      font-size: 1rem;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+      user-select: none;
+      touch-action: pan-y;
+      &:active {
+        cursor: grabbing;
+      }
+    }
+    .wall-task_tools {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--wall-muted);
+    }
+    .wall-task_grip {
+      cursor: grab;
+      width: 1rem;
+      height: 1rem;
+      opacity: 0.5;
+    }
+    .wall-task_check.button_wrap {
+      width: 1.75rem;
+      height: 1.75rem;
+      min-height: 1.75rem;
+      border: 0.0625rem solid var(--wall-line);
+      margin-top: 0.3rem;
+    }
+    .wall-task_check [data-pending-icon] {
+      opacity: 0;
+    }
+    .wall-task_check:hover [data-pending-icon],
+    .wall-task_check:focus-visible [data-pending-icon] {
+      opacity: 1;
+    }
+    @keyframes wall-shake {
+      0%,
+      100% {
+        rotate: -0.7deg;
+      }
+      50% {
+        rotate: 0.7deg;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .wall-task_wrap.is-held .wall-task_body {
+        animation: none;
+      }
+    }
+  }
+</style>

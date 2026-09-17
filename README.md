@@ -1,3 +1,47 @@
+# theWall
+
+Tablero personal de tareas con Astro, Lumos y SortableJS. Cada tarea contiene un unico texto. Se organiza en grupos y puede entrar en Focus conservando su grupo de origen.
+
+## Desarrollo
+
+```sh
+npm install
+npm run dev -- --background --host 127.0.0.1 --port 4321
+npm run astro -- dev status
+npm run astro -- dev logs
+npm run astro -- dev stop
+```
+
+Abrir http://127.0.0.1:4321. Si ese puerto esta ocupado, elegir otro y actualizar la URL de las pruebas.
+
+## Comprobaciones
+
+```sh
+npm test
+npm run check
+npm run build
+npm run test:e2e
+```
+
+Las pruebas de navegador requieren el servidor iniciado y Microsoft Edge instalado. Se ejecutan en contextos aislados, sin modificar las tareas de tu navegador habitual. Usan escritorio y emulacion tactil; las capturas y los fallos quedan en test-results/.
+
+## Datos y alcance
+
+- localStorage guarda tareas, grupos, orden, Focus y borrador bajo thewall:data.
+- Los datos pertenecen a ese navegador y origen (incluido el puerto); no hay cuenta, servidor de datos ni sincronizacion entre dispositivos.
+- Borrar los datos del sitio elimina el tablero. Los datos corruptos se conservan sin sobrescribir y se informa de los errores de almacenamiento.
+- Crear abre colocacion: hay que elegir un grupo antes de poder enfocar la tarea.
+- Clic o pulsacion larga selecciona. Se puede mover por clic o arrastre, y cancelar con Escape o el boton de cancelar.
+- Los grupos con tareas pendientes o completadas no se pueden borrar.
+- La papelera de cada tarjeta elimina la tarea; si estaba en Focus, devuelve al tablero.
+- Renombrar grupos, deshacer el borrado y copias JSON siguen fuera de esta entrega.
+
+Plan: [docs/PLAN.md](docs/PLAN.md). Avance verificable: [docs/CHECKLIST.md](docs/CHECKLIST.md).
+
+## Base Lumos
+
+Se conserva a continuacion la documentacion original del framework. Los avisos de terceros estan en THIRD_PARTY_NOTICES.
+
 <p align="center">
   <img src=".github/assets/banner.png" alt="Lumos For Astro" width="720">
 </p>

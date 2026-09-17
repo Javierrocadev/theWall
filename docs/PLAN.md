@@ -1,6 +1,6 @@
 # theWall: plan de desarrollo IA-first
 
-Estado: listo para implementar por fases. Este documento planifica; no implica que la app ya este construida.
+Estado: primera version funcional implementada. Ver docs/CHECKLIST.md para avance y evidencia. Las mejoras opcionales no forman parte de esta entrega.
 
 ## 1. Objetivo y alcance
 
@@ -9,7 +9,7 @@ Construir una app personal de tareas cuya primera pantalla sea el tablero de tra
 Requisitos confirmados:
 
 - Persistencia en el navegador, sin cuentas ni backend.
-- Crear, editar y completar tareas. Recuperar las completadas.
+- Crear, editar, completar y eliminar tareas. Recuperar las completadas.
 - Cada tarea contiene un unico texto editable, sin descripcion ni campo de contenido adicional.
 - Sin subtareas, fechas de vencimiento, prioridades ni recordatorios.
 - Campo de escritura arriba, Focus debajo y grupos de tareas a continuacion.
@@ -20,10 +20,10 @@ Requisitos confirmados:
 - Colocar mediante arrastre o pulsacion sobre el destino.
 - En colocacion, destacar destinos y desenfocar sutilmente el resto.
 - Focus tiene tres tamanos: compacto, destino ampliado y espacio de trabajo expandido.
-- Al enfocar, mostrar la tarea centrada bajo el campo de escritura; los grupos salen de la vista principal.
+- Al enfocar, mostrar solo la zona Focus con la tarea centrada; ocultar el campo de creacion, su cabecera y los grupos.
 - Una tarea enfocada conserva su pertenencia al grupo de origen.
 
-Mejoras propuestas por el asistente, pendientes de validar su inclusion: renombrar grupos, eliminar tareas con deshacer y exportar/importar JSON. Sus menciones en las fases siguientes son propuestas, no requisitos confirmados.
+Mejoras propuestas por el asistente, pendientes de validar su inclusion: renombrar grupos, deshacer el borrado y exportar/importar JSON. Sus menciones en las fases siguientes son propuestas, no requisitos confirmados. El borrado directo de tareas ya esta solicitado e implementado.
 
 ## 2. Decisiones propuestas para cerrar casos limite
 
@@ -38,7 +38,7 @@ Son valores iniciales de implementacion, ajustables tras probar el prototipo:
 - Una tarea enviada por clic a otro grupo se coloca al final. El arrastre respeta la posicion de insercion.
 - Focus no es otro grupo: se representa con una referencia a una tarea pendiente existente.
 - Salir de Focus restaura el tablero y su posicion de scroll. Completar o eliminar la tarea enfocada tambien sale de Focus.
-- Al crear desde Focus, mostrar de nuevo los grupos y desactivar Focus como destino. Al confirmar, volver al tablero; al cancelar, restaurar el Focus anterior.
+- Para crear otra tarea, salir primero de Focus. Conservar cualquier borrador previo y restaurar el campo al salir.
 - Las completadas se consultan en una vista secundaria y conservan su grupo. Tambien cuentan al impedir borrar ese grupo.
 - Las completadas pueden reabrirse, eliminarse o reasignarse de grupo; no pueden entrar en Focus hasta reabrirlas.
 - Se pueden borrar incluso los grupos iniciales cuando esten vacios. Si no queda ninguno, ofrecer crear grupo; nunca recrearlos automaticamente en cada recarga.
@@ -137,7 +137,7 @@ Modelar la interaccion como union discriminada para evitar combinaciones como do
 | board | Inicio o salida de Focus | Campo, Focus compacto, grupos | Crear, seleccionar, editar, completar |
 | placing-new | Crear con titulo valido | Preview del borrador; grupos activos; Focus inhabilitado; blur sutil | Confirmar grupo o cancelar al campo |
 | placing-existing | Clic o pulsacion larga | Tarjeta activa; grupos y Focus ampliado como destinos | Mover, enfocar o cancelar |
-| focused | Colocar tarea existente en Focus | Campo visible; Focus expandido; tarjeta centrada | Salir, editar, completar, eliminar o crear |
+| focused | Colocar tarea existente en Focus | Solo Focus expandido y tarjeta centrada | Salir, editar, completar o eliminar |
 
 Editar es un dialogo asociado a una tarea, no un destino. Desactivar colocacion mientras esta abierto. Los botones internos no disparan seleccion ni drag.
 
@@ -165,7 +165,7 @@ Constructivismo aplicado a una herramienta de uso diario:
 - Explorar un pequeno recurso grafico constructivista o recorte monocromo en el estado vacio, usando un asset real. El area de tareas mantiene su legibilidad.
 - Blur localizado: tarjeta activa y destinos quedan nitidos y operables. No aplicar filter a un ancestro comun que desenfoque tambien los destinos.
 - Focus compacto siempre identificable. Al seleccionar una tarea existente, aumentar el area y mostrar "Traer al foco". Al crear, mostrarlo inhabilitado y sin invitacion a soltar.
-- En Focus activo, usar el alto disponible bajo el campo con unidades dinamicas y permitir scroll para contenido largo. Los grupos quedan ocultos y fuera del orden de tabulacion.
+- En Focus activo, usar el alto de pantalla disponible con unidades dinamicas y permitir scroll para contenido largo. El campo, su cabecera y los grupos quedan ocultos y fuera del orden de tabulacion.
 - Microtransiciones iniciales de 120-180 ms; expansion de Focus de 280-400 ms; valores a ajustar con pruebas reales.
 - El shake afecta solo a la tarjeta sostenida, con amplitud pequena y duracion limitada. No debe producir movimiento continuo del tablero.
 - prefers-reduced-motion elimina shake y desplazamientos amplios, conservando indicadores claros de estado.
@@ -199,7 +199,7 @@ Criterio: recargar conserva tareas, grupos, orden, completadas y Focus valido. C
 - Crear, editar el texto de la tarea, completar, reabrir y eliminar con deshacer.
 - Crear y renombrar grupos; bloquear borrado si contienen tareas pendientes o completadas.
 - Construir vista secundaria de completadas y reasignacion de su grupo.
-- Resolver tablero sin grupos, listas vacias, textos largos y creacion desde Focus.
+- Resolver tablero sin grupos, listas vacias, textos largos y restauracion del borrador al salir de Focus.
 - Excluir los controles internos de los gestos de la tarjeta.
 
 Criterio: todas las operaciones funcionan por clic y teclado; ningun movimiento requiere drag obligatoriamente.
@@ -248,7 +248,7 @@ Usar un runner de pruebas TypeScript compatible con el proyecto para dominio y P
 | Mantener -> arrastrar -> soltar | Shake controlado, movimiento unico, sin clic posterior |
 | Arrastrar -> destino invalido o Escape | Sin cambio persistido ni clones sobrantes |
 | Enfocar -> salir -> recargar | Conserva identidad, grupo y orden |
-| Crear desde Focus -> confirmar/cancelar | Resultado previsto y restauracion coherente |
+| Entrar en Focus -> salir/completar | Creacion oculta en Focus y borrador restaurado al volver |
 | Editar/completar/eliminar desde tarjeta | No inicia colocacion accidentalmente |
 | Completar/reabrir y borrar grupo | Completadas conservadas; grupo ocupado protegido |
 | Borrar todos los grupos -> recargar -> crear | No reaparecen grupos borrados; borrador protegido |
@@ -271,9 +271,17 @@ Usar un runner de pruebas TypeScript compatible con el proyecto para dominio y P
 
 | Fase | Estado | Evidencia |
 | --- | --- | --- |
-| 1. Prototipo de interaccion | Pendiente | - |
-| 2. Estado y persistencia | Pendiente | - |
-| 3. Tareas y grupos | Pendiente | - |
-| 4. Visual y movimiento | Pendiente | - |
-| 5. Recuperacion y copias | Pendiente | - |
-| 6. Verificacion y entrega | Pendiente | - |
+| 1. Prototipo de interaccion | Completada | Clic, drag, pulsacion larga, destino invalido y Focus probados en navegador |
+| 2. Estado y persistencia | Completada | 9 pruebas de dominio y almacenamiento; recarga y borrador en E2E |
+| 3. Tareas y grupos | Alcance confirmado completado | Crear, editar texto, completar, reabrir, crear grupo y borrar solo vacios |
+| 4. Visual y movimiento | Primera version completada | Capturas desktop/mobile; anchos 360, 390, 768 y 1440 |
+| 5. Recuperacion y copias | Recuperacion basica completada; copias aplazadas | Datos invalidos preservados; importacion/exportacion y deshacer sin autorizar |
+| 6. Verificacion y entrega | Completada | Tipos sin errores, build correcto, 22 E2E y 9 pruebas de dominio; servidor en http://127.0.0.1:4321 |
+
+### Decisiones durante la implementacion
+
+- WallLayout.astro da a la app su propio idioma, metadatos y acceso al contenido, sin cambiar el layout de los ejemplos de Lumos.
+- Composer y Focus permanecen en ContentWall.astro porque comparten presentacion y estado. Tarjetas y grupos tienen sus propias plantillas y estilos reutilizables.
+- Se usa @lucide/astro, nombre vigente del paquete de iconos. SortableJS sigue siendo la libreria de arrastre acordada.
+- Las pruebas de navegador usan Edge instalado, con emulacion movil. Falta la comprobacion en hardware tactil real.
+- El borrado directo de tareas se ha incorporado mediante papelera en pendientes, completadas y Focus. Renombrar grupos, deshacer e importar/exportar JSON siguen fuera; las menciones previas en las fases son propuestas.

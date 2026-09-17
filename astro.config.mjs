@@ -5,6 +5,7 @@ import { SITE_URL } from "./src/consts.ts";
 import { isNoindexRoute } from "./src/utils/seo.ts";
 
 export default defineConfig({
+  devToolbar: { enabled: false },
   site: SITE_URL,
   integrations: [
     sitemap({
