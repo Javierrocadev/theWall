@@ -27,7 +27,6 @@ const { render = true } = Astro.props;
         </span>
       </div>
       <div class="wall-group_header">
-        <span class="wall-group_number" aria-hidden="true" data-group-number />
         <Heading tag="h2" variant="inherit" class="wall-group_title">
           <span data-group-name />
         </Heading>
@@ -70,6 +69,7 @@ const { render = true } = Astro.props;
       position: relative;
       min-width: 0;
       align-self: start;
+      padding-inline: 1rem;
       &:nth-child(3n + 2) {
         --group-accent: var(--wall-ink);
       }
@@ -134,12 +134,6 @@ const { render = true } = Astro.props;
       gap: 0.625rem;
       align-items: center;
       min-height: 5rem;
-    }
-    .wall-group_number {
-      font-size: 0.65rem;
-      color: var(--wall-muted);
-      align-self: center;
-      font-family: monospace;
     }
     .wall-group_title {
       font-size: 1.125rem;
