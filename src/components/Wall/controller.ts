@@ -23,6 +23,16 @@ export function mountWall(root: HTMLElement) {
   const dialog = get<HTMLDialogElement>("[data-dialog]");
   const dialogInput = get<HTMLInputElement>("[data-dialog-input]");
   const groups = get("[data-groups]");
+  const groupObserver = new ResizeObserver((entries) => {
+    const rowHeight = parseFloat(getComputedStyle(groups).gridAutoRows);
+    if (!Number.isFinite(rowHeight) || rowHeight <= 0) return;
+    for (const { target, borderBoxSize } of entries) {
+      const group = target as HTMLElement;
+      const height = borderBoxSize[0]?.blockSize ?? group.offsetHeight;
+      const spacing = parseFloat(getComputedStyle(group).marginBottom) || 0;
+      group.style.gridRowEnd = `span ${Math.max(1, Math.ceil((height + spacing) / rowHeight))}`;
+    }
+  });
   const frameObserver = new ResizeObserver((entries) => {
     for (const { target, contentRect } of entries) {
       const edge = target as HTMLElement;
@@ -299,18 +309,13 @@ export function mountWall(root: HTMLElement) {
       active?.closest<HTMLElement>("[data-task-id]")?.dataset.taskId;
     destroyDrag?.();
     frameObserver.disconnect();
+    groupObserver.disconnect();
     groups.replaceChildren();
     focusList.replaceChildren();
     draftList.replaceChildren();
-    for (const [index, group] of [...wall.groups]
-      .sort((a, b) => a.order - b.order)
-      .entries()) {
+    for (const group of [...wall.groups].sort((a, b) => a.order - b.order)) {
       const node = clone("[data-group-template]");
       node.dataset.groupId = group.id;
-      get("[data-group-number]", node).textContent = String(index + 1).padStart(
-        2,
-        "0",
-      );
       get("[data-group-name]", node).textContent = group.name;
       get("[data-action=place]", node).setAttribute(
         "aria-label",
@@ -330,6 +335,7 @@ export function mountWall(root: HTMLElement) {
       get("[data-group-empty]", node).hidden = tasks.length > 0;
       tasks.forEach((task) => list.append(card(task)));
       groups.append(node);
+      groupObserver.observe(node);
       node.querySelectorAll(".wall-group_edge-left, .wall-group_edge-right")
         .forEach((edge) => frameObserver.observe(edge));
     }
