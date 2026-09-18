@@ -12,6 +12,20 @@ const { render = true } = Astro.props;
 {
   render && (
     <section class="wall-group_wrap" data-group-id="">
+      <div class="wall-group_frame" aria-hidden="true">
+        <span class="wall-group_edge wall-group_edge-top">
+          {Array.from({ length: 48 }, () => <span class="wall-group_stroke" />)}
+        </span>
+        <span class="wall-group_edge wall-group_edge-right">
+          {Array.from({ length: 24 }, () => <span class="wall-group_stroke" />)}
+        </span>
+        <span class="wall-group_edge wall-group_edge-bottom">
+          {Array.from({ length: 48 }, () => <span class="wall-group_stroke" />)}
+        </span>
+        <span class="wall-group_edge wall-group_edge-left">
+          {Array.from({ length: 24 }, () => <span class="wall-group_stroke" />)}
+        </span>
+      </div>
       <div class="wall-group_header">
         <span class="wall-group_number" aria-hidden="true" data-group-number />
         <Heading tag="h2" variant="inherit" class="wall-group_title">
@@ -56,13 +70,64 @@ const { render = true } = Astro.props;
       position: relative;
       min-width: 0;
       align-self: start;
-      border-top: 0.25rem solid var(--group-accent);
       &:nth-child(3n + 2) {
         --group-accent: var(--wall-ink);
       }
       &:nth-child(3n + 3) {
         --group-accent: #5c8c80;
       }
+    }
+    .wall-group_frame {
+      position: absolute;
+      inset: -0.375rem;
+      pointer-events: none;
+    }
+    .wall-group_edge {
+      position: absolute;
+      display: flex;
+      justify-content: flex-start;
+      gap: 0;
+      & .wall-group_stroke {
+        display: block;
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 0;
+        background: var(--group-accent);
+        transform: rotate(-28deg);
+        transform-origin: center;
+        transition: transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+    }
+    .wall-group_edge-top,
+    .wall-group_edge-bottom {
+      left: 0;
+      right: 0;
+      height: 0.1rem;
+    }
+    .wall-group_edge-top {
+      top: 0;
+    }
+    .wall-group_edge-bottom {
+      bottom: 0;
+    }
+    .wall-group_edge-left,
+    .wall-group_edge-right {
+      top: 0;
+      bottom: 0;
+      width: 0.1rem;
+      flex-direction: column;
+      & .wall-group_stroke {
+        flex: 0 0 0.6rem;
+      }
+      & .wall-group_stroke:last-child {
+        flex: 1 1 0;
+      }
+    }
+    .wall-group_edge-left {
+      left: 0;
+    }
+    .wall-group_edge-right {
+      right: 0;
     }
     .wall-group_header {
       display: flex;
@@ -131,8 +196,6 @@ const { render = true } = Astro.props;
       }
     }
     .wall_wrap[data-placing="true"] .wall-group_wrap {
-      outline: 0.0625rem dashed var(--group-accent);
-      outline-offset: 0.375rem;
       animation: wall-group-nudge 2.4s ease-in-out infinite;
       &:nth-child(3n + 2) {
         animation-delay: 0.2s;
@@ -140,6 +203,19 @@ const { render = true } = Astro.props;
       &:nth-child(3n + 3) {
         animation-delay: 0.4s;
       }
+    }
+    .wall_wrap[data-placing="true"] .wall-group_stroke {
+      animation: wall-group-frame-close 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+      transform: rotate(0);
+    }
+    .wall_wrap[data-placing="true"] .wall-group_edge-right .wall-group_stroke {
+      animation-delay: 0.08s;
+    }
+    .wall_wrap[data-placing="true"] .wall-group_edge-bottom .wall-group_stroke {
+      animation-delay: 0.16s;
+    }
+    .wall_wrap[data-placing="true"] .wall-group_edge-left .wall-group_stroke {
+      animation-delay: 0.24s;
     }
     .wall_wrap[data-placing="true"] .wall-group_empty {
       top: 10rem;
@@ -158,9 +234,23 @@ const { render = true } = Astro.props;
         transform: translateY(0);
       }
     }
+    @keyframes wall-group-frame-close {
+      0%,
+      18% {
+        transform: rotate(-28deg);
+      }
+      58%,
+      100% {
+        transform: rotate(0);
+      }
+    }
     @media (prefers-reduced-motion: reduce) {
-      .wall_wrap[data-placing="true"] .wall-group_wrap {
+      .wall_wrap[data-placing="true"] .wall-group_wrap,
+      .wall_wrap[data-placing="true"] .wall-group_stroke {
         animation: none;
+      }
+      .wall-group_stroke {
+        transition: none;
       }
     }
   }

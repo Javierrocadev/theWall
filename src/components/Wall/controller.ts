@@ -23,6 +23,22 @@ export function mountWall(root: HTMLElement) {
   const dialog = get<HTMLDialogElement>("[data-dialog]");
   const dialogInput = get<HTMLInputElement>("[data-dialog-input]");
   const groups = get("[data-groups]");
+  const frameObserver = new ResizeObserver((entries) => {
+    for (const { target, contentRect } of entries) {
+      const edge = target as HTMLElement;
+      const stroke = edge.firstElementChild as HTMLElement | null;
+      if (!stroke || contentRect.height <= 0) continue;
+      const length = parseFloat(getComputedStyle(stroke).flexBasis);
+      if (!Number.isFinite(length) || length <= 0) continue;
+      const count = Math.max(2, Math.ceil(contentRect.height / length));
+      while (edge.childElementCount < count) {
+        edge.append(stroke.cloneNode());
+      }
+      while (edge.childElementCount > count) {
+        edge.lastElementChild!.remove();
+      }
+    }
+  });
   const focusList = get("[data-focus-list]");
   const draftList = get("[data-draft-list]");
   const storage = {
@@ -282,6 +298,7 @@ export function mountWall(root: HTMLElement) {
     const activeId =
       active?.closest<HTMLElement>("[data-task-id]")?.dataset.taskId;
     destroyDrag?.();
+    frameObserver.disconnect();
     groups.replaceChildren();
     focusList.replaceChildren();
     draftList.replaceChildren();
@@ -313,6 +330,8 @@ export function mountWall(root: HTMLElement) {
       get("[data-group-empty]", node).hidden = tasks.length > 0;
       tasks.forEach((task) => list.append(card(task)));
       groups.append(node);
+      node.querySelectorAll(".wall-group_edge-left, .wall-group_edge-right")
+        .forEach((edge) => frameObserver.observe(edge));
     }
     if (mode.kind === "focused" && wall.focusedTaskId) {
       const task = taskFor(wall.focusedTaskId);
