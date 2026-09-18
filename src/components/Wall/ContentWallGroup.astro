@@ -196,7 +196,7 @@ const { render = true } = Astro.props;
       }
     }
     .wall_wrap[data-placing="true"] .wall-group_wrap {
-      animation: wall-group-nudge 2.4s ease-in-out infinite;
+      animation: wall-group-nudge   3s ease-in-out infinite;
       &:nth-child(3n + 2) {
         animation-delay: 0.2s;
       }
@@ -236,11 +236,12 @@ const { render = true } = Astro.props;
     }
     @keyframes wall-group-frame-close {
       0%,
-      18% {
+      18%,
+      100% {
         transform: rotate(-28deg);
       }
       58%,
-      100% {
+      72% {
         transform: rotate(0);
       }
     }
