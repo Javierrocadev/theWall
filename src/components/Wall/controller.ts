@@ -85,9 +85,6 @@ export function mountWall(root: HTMLElement) {
   function persist() {
     clearTimeout(draftTimer);
     const saved = !blocked && writeWall(storage, wall);
-    get("[data-save-status]").textContent = saved
-      ? "Todo guardado"
-      : "Sin guardar";
     if (!saved && !blocked)
       warning(
         "No se han podido guardar los cambios en este navegador. Conserva esta ventana abierta.",
@@ -591,7 +588,6 @@ export function mountWall(root: HTMLElement) {
   );
   input.addEventListener("input", () => {
     wall = reduceWall(wall, { type: "draft", title: input.value });
-    get("[data-save-status]").textContent = "Guardando...";
     clearTimeout(draftTimer);
     draftTimer = setTimeout(persist, 200);
   });
@@ -687,7 +683,6 @@ export function mountWall(root: HTMLElement) {
       announce("Tablero actualizado desde otra ventana.", true);
     } catch {
       blocked = true;
-      get("[data-save-status]").textContent = "Sin guardar";
       warning(
         "Los datos de otra ventana no se pueden leer. Tu tablero actual se conserva.",
       );
@@ -704,8 +699,5 @@ export function mountWall(root: HTMLElement) {
 
   input.value = wall.draft?.title ?? "";
   warning(loaded.message);
-  get("[data-save-status]").textContent = blocked
-    ? "Sin guardar"
-    : "Todo guardado";
   render();
 }
