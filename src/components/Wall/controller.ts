@@ -646,7 +646,11 @@ export function mountWall(root: HTMLElement) {
   root.addEventListener("pointerdown", (event) => {
     if (event.button !== 0 || mode.kind === "focused") return;
     const target = event.target as Element;
-    if (!target.closest(".wall-task_select, .wall-task_grip")) return;
+    if (
+      target.closest(
+        "[data-action=edit], [data-action=toggle], [data-action=delete-task]",
+      )
+    ) return;
     const item = target.closest<HTMLElement>("[data-task-id]");
     if (
       !item ||

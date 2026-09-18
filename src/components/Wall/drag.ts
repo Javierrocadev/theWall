@@ -13,6 +13,11 @@ type DragHandlers = {
 
 export function connectDrag(root: HTMLElement, handlers: DragHandlers) {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let origin: { x: number; y: number } | undefined;
+  const rememberPointer = (event: PointerEvent) => {
+    origin = { x: event.clientX, y: event.clientY };
+  };
+  root.addEventListener("pointerdown", rememberPointer, true);
   const instances = Array.from(
     root.querySelectorAll<HTMLElement>("[data-drop]"),
   ).map(
@@ -24,7 +29,7 @@ export function connectDrag(root: HTMLElement, handlers: DragHandlers) {
           put: (_to, _from, item) => handlers.canDrop(list, item),
         },
         draggable: ".wall-task_wrap",
-        handle: ".wall-task_select, .wall-task_grip",
+        handle: ".wall-task_wrap",
         filter:
           "[data-action=edit], [data-action=toggle], [data-action=delete-task]",
         preventOnFilter: false,
@@ -34,11 +39,27 @@ export function connectDrag(root: HTMLElement, handlers: DragHandlers) {
         touchStartThreshold: 8,
         fallbackTolerance: 6,
         forceFallback: true,
-        fallbackOnBody: false,
+        fallbackOnBody: true,
         emptyInsertThreshold: 24,
         sort: list.dataset.drop === "group",
         disabled: root.dataset.mode === "focused",
-        onStart: (event) => handlers.start(event.item),
+        onStart: (event) => {
+          const ghost = Sortable.ghost;
+          if (ghost) {
+            const styles = getComputedStyle(event.item);
+            for (const property of styles) {
+              if (property.startsWith("--")) {
+                ghost.style.setProperty(property, styles.getPropertyValue(property));
+              }
+            }
+            ghost.style.font = styles.font;
+            if (origin) {
+              ghost.style.left = `${origin.x - parseFloat(ghost.style.width) / 2}px`;
+              ghost.style.top = `${origin.y - parseFloat(ghost.style.height) / 2}px`;
+            }
+          }
+          handlers.start(event.item);
+        },
         onMove: (event) => handlers.canDrop(event.to, event.dragged),
         onEnd: (event) => {
           const original = (
@@ -65,5 +86,8 @@ export function connectDrag(root: HTMLElement, handlers: DragHandlers) {
         },
       }),
   );
-  return () => instances.forEach((instance) => instance.destroy());
+  return () => {
+    root.removeEventListener("pointerdown", rememberPointer, true);
+    instances.forEach((instance) => instance.destroy());
+  };
 }
