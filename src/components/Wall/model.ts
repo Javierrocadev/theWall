@@ -35,6 +35,7 @@ export type Action =
   | { type: "delete-task"; id: string }
   | { type: "focus"; id: string | null }
   | { type: "add-group"; id: string; name: string }
+  | { type: "edit-group"; id: string; name: string }
   | { type: "delete-group"; id: string }
   | { type: "draft"; title: string };
 
@@ -150,6 +151,17 @@ export function reduceWall(current: Wall, action: Action): Wall {
         throw new Error("Ya existe un grupo con ese nombre.");
       }
       wall.groups.push({ id: action.id, name, order: wall.groups.length });
+      break;
+    }
+    case "edit-group": {
+      const group = wall.groups.find((group) => group.id === action.id);
+      if (!group) throw new Error("El grupo ya no existe.");
+      const name = titleOf(action.name, 64);
+      if (wall.groups.some((other) =>
+        other.id !== action.id &&
+        other.name.toLocaleLowerCase() === name.toLocaleLowerCase()
+      )) throw new Error("Ya existe un grupo con ese nombre.");
+      group.name = name;
       break;
     }
     case "delete-group":

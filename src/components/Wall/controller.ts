@@ -75,7 +75,7 @@ export function mountWall(root: HTMLElement) {
   } | null = null;
   let editor:
     | { kind: "task"; id: string }
-    | { kind: "group"; resumeCreate: boolean }
+    | { kind: "group"; resumeCreate: boolean; id?: string }
     | null = null;
   let boardScroll = 0;
   let incoming: string | null | undefined;
@@ -498,15 +498,18 @@ export function mountWall(root: HTMLElement) {
     announce("Elige un grupo para la nueva tarea.");
   }
 
-  function openGroup(resumeCreate = false) {
-    editor = { kind: "group", resumeCreate };
-    get("#wall-dialog-title").textContent = "Nuevo grupo";
+  function openGroup(resumeCreate = false, id?: string) {
+    const group = wall.groups.find((group) => group.id === id);
+    if (id && !group) return;
+    editor = { kind: "group", resumeCreate, id };
+    get("#wall-dialog-title").textContent = id ? "Editar grupo" : "Nuevo grupo";
     dialogInput.maxLength = 64;
-    dialogInput.value = "";
+    dialogInput.value = group?.name ?? "";
     dialogInput.setAttribute("aria-label", "Nombre del grupo");
     get("[data-dialog-error]").hidden = true;
     dialog.showModal();
     dialogInput.focus();
+    if (id) dialogInput.select();
   }
 
   root.addEventListener("click", (event) => {
@@ -546,6 +549,10 @@ export function mountWall(root: HTMLElement) {
     }
     const groupId =
       target.closest<HTMLElement>("[data-group-id]")?.dataset.groupId;
+    if (action === "edit-group" && groupId) {
+      openGroup(false, groupId);
+      return;
+    }
     if (placing() && groupId) {
       placeIn(groupId);
       return;
@@ -627,8 +634,8 @@ export function mountWall(root: HTMLElement) {
           editor.kind === "task"
             ? { type: "edit", id: editor.id, title: dialogInput.value }
             : {
-                type: "add-group",
-                id: crypto.randomUUID(),
+                type: editor.id ? "edit-group" : "add-group",
+                id: editor.id ?? crypto.randomUUID(),
                 name: dialogInput.value,
               },
         );
@@ -641,11 +648,16 @@ export function mountWall(root: HTMLElement) {
       }
       const resume = editor.kind === "group" && editor.resumeCreate;
       const editedId = editor.kind === "task" ? editor.id : null;
+      const editedGroupId = editor.kind === "group" ? editor.id : null;
       persist();
       dialog.close();
       render();
       if (resume) create();
       else if (editedId) focusTask(editedId);
+      else if (editedGroupId) {
+        const group = all("[data-group-id]").find((group) => group.dataset.groupId === editedGroupId);
+        group?.querySelector<HTMLButtonElement>("[data-action=edit-group]")?.focus();
+      }
     },
   );
 

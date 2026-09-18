@@ -16,6 +16,20 @@ const create = (id = "a") =>
     groupId: "group-1",
   });
 
+test("editar un grupo conserva tareas y valida el nombre", () => {
+  const before = create();
+  const after = reduceWall(before, { type: "edit-group", id: "group-1", name: "  Trabajo  " });
+  assert.equal(after.groups[0].name, "Trabajo");
+  assert.equal(before.groups[0].name, "Urgente");
+  assert.deepEqual(after.tasks, before.tasks);
+  assert.deepEqual(parseWall(JSON.stringify(after)), after);
+  for (const name of [" ", "hoy", "x".repeat(65)]) {
+    assert.throws(() => reduceWall(before, { type: "edit-group", id: "group-1", name }));
+  }
+  assert.doesNotThrow(() => reduceWall(before, { type: "edit-group", id: "group-1", name: "Urgente" }));
+  assert.throws(() => reduceWall(before, { type: "edit-group", id: "missing", name: "Trabajo" }));
+});
+
 test("crear exige un grupo real y nunca convierte Focus en grupo", () => {
   for (const groupId of ["", "focus", "inexistente"]) {
     assert.throws(() =>

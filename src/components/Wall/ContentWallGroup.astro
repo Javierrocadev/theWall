@@ -1,5 +1,5 @@
 ---
-import { Trash, ArrowDownRight } from "@lucide/astro";
+import { Trash, ArrowDownRight, Pencil } from "@lucide/astro";
 import Button from "@/components/Button.astro";
 import Heading from "@/components/Typography/Heading.astro";
 interface Props {
@@ -31,6 +31,14 @@ const { render = true } = Astro.props;
           <span data-group-name />
         </Heading>
         <span class="wall-group_count" data-group-count />
+        <Button
+          class="wall_icon"
+          data-action="edit-group"
+          aria-label="Editar nombre del grupo"
+          title="Editar nombre del grupo"
+        >
+          <Pencil />
+        </Button>
         <Button
           class="wall_icon wall-group_delete"
           data-action="delete-group"
