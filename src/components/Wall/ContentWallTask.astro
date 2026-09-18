@@ -84,8 +84,8 @@ const { render = true } = Astro.props;
         z-index: 3;
       }
       &.is-selected .wall-task_body {
-        border-color: var(--wall-red);
-        box-shadow: 0.25rem 0.25rem 0 var(--wall-red);
+        border-color: var(--wall-primary);
+        box-shadow: 0.25rem 0.25rem 0 var(--wall-primary);
       }
       &.is-held .wall-task_body {
         animation: wall-shake 180ms ease-in-out 6;
@@ -95,7 +95,7 @@ const { render = true } = Astro.props;
         color: var(--wall-muted);
       }
       &.is-completed .wall-task_check {
-        background: var(--wall-mint);
+        background: var(--wall-blue-soft);
       }
       &.sortable-ghost {
         opacity: 0.2;

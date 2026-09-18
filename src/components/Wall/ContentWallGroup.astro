@@ -73,7 +73,7 @@ const { render = true } = Astro.props;
 <style is:global>
   @layer components {
     .wall-group_wrap {
-      --group-accent: var(--wall-red);
+      --group-accent: var(--wall-primary);
       position: relative;
       min-width: 0;
       align-self: start;
@@ -82,7 +82,7 @@ const { render = true } = Astro.props;
         --group-accent: var(--wall-ink);
       }
       &:nth-child(3n + 3) {
-        --group-accent: #5c8c80;
+        --group-accent: var(--wall-secondary);
       }
     }
     .wall-group_frame {
@@ -189,7 +189,7 @@ const { render = true } = Astro.props;
       width: 100%;
       padding: 0.65rem 0.875rem;
       font-size: 0.8rem;
-      background: var(--wall-mint);
+      background: var(--wall-blue-soft);
       border: 0.0625rem dashed var(--wall-ink);
       margin-bottom: 0.75rem;
       & svg {
