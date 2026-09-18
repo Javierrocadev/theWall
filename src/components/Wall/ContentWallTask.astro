@@ -1,5 +1,5 @@
 ---
-import { Check, Pencil, GripVertical, RotateCcw, Trash } from "@lucide/astro";
+import { Check, Pencil, Focus, RotateCcw, Trash } from "@lucide/astro";
 import Button from "@/components/Button.astro";
 
 interface Props {
@@ -49,7 +49,14 @@ const { render = true } = Astro.props;
           >
             <Trash />
           </Button>
-          <GripVertical class="wall-task_grip" aria-hidden="true" />
+          <Button
+            class="wall_icon"
+            data-action="focus-task"
+            aria-label="Llevar tarea a Focus"
+            title="Llevar tarea a Focus"
+          >
+            <Focus />
+          </Button>
         </div>
       </div>
     </article>
@@ -64,6 +71,15 @@ const { render = true } = Astro.props;
       min-width: 0;
       color: var(--wall-ink);
       list-style: none;
+      cursor: grab;
+      &:active,
+      &.is-held,
+      &.sortable-fallback {
+        cursor: grabbing;
+      }
+      &.is-completed [data-action="focus-task"] {
+        display: none;
+      }
       &.is-selected {
         z-index: 3;
       }
@@ -106,6 +122,9 @@ const { render = true } = Astro.props;
         display: none;
       }
     }
+    .wall_wrap[data-mode="focused"] [data-action="focus-task"] {
+      display: none;
+    }
     .wall-task_body {
       display: flex;
       align-items: flex-start;
@@ -144,12 +163,6 @@ const { render = true } = Astro.props;
       align-items: center;
       gap: 0.5rem;
       color: var(--wall-muted);
-    }
-    .wall-task_grip {
-      cursor: grab;
-      width: 1rem;
-      height: 1rem;
-      opacity: 0.5;
     }
     .wall-task_check.button_wrap {
       width: 1.75rem;

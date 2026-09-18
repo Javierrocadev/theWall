@@ -549,6 +549,12 @@ export function mountWall(root: HTMLElement) {
     }
     const groupId =
       target.closest<HTMLElement>("[data-group-id]")?.dataset.groupId;
+    if (action === "focus-task" && id) {
+      if (mode.kind === "placing-new" || mode.kind === "focused" || taskFor(id)?.status !== "pending") return;
+      selectTask(id);
+      enterFocus();
+      return;
+    }
     if (action === "edit-group" && groupId) {
       openGroup(false, groupId);
       return;
@@ -666,7 +672,7 @@ export function mountWall(root: HTMLElement) {
     const target = event.target as Element;
     if (
       target.closest(
-        "[data-action=edit], [data-action=toggle], [data-action=delete-task]",
+        "[data-action=edit], [data-action=toggle], [data-action=delete-task], [data-action=focus-task]",
       )
     ) return;
     const item = target.closest<HTMLElement>("[data-task-id]");

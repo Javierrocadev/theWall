@@ -31,7 +31,7 @@ export function connectDrag(root: HTMLElement, handlers: DragHandlers) {
         draggable: ".wall-task_wrap",
         handle: ".wall-task_wrap",
         filter:
-          "[data-action=edit], [data-action=toggle], [data-action=delete-task]",
+          "[data-action=edit], [data-action=toggle], [data-action=delete-task], [data-action=focus-task]",
         preventOnFilter: false,
         animation: reduced ? 0 : 150,
         delay: 300,
